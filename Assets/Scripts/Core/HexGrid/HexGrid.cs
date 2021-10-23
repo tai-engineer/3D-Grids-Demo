@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GridSystem.HexGrid
+namespace HexGrid
 {
     public class HexGrid : MonoBehaviour
     {
@@ -15,9 +15,11 @@ namespace GridSystem.HexGrid
 
         HexCell[] _cells;
         Canvas _gridCanvas;
+        HexMesh _hexMesh;
         void Awake()
         {
             _gridCanvas = GetComponentInChildren<Canvas>();
+            _hexMesh = GetComponentInChildren<HexMesh>();
 
             _cells = new HexCell[width * height];
 
@@ -30,21 +32,61 @@ namespace GridSystem.HexGrid
             }
         }
 
+        void Start()
+        {
+            _hexMesh.Triangulate(_cells);
+        }
         void CreateCell(int x, int z, int i)
         {
             Vector3 position;
-            position.x = (x + z *  0.5f) * (HexMetrics.innerRadius * 2f);
-            position.z = z * (HexMetrics.innerRadius * 1.5f); ;
+            position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
+            position.z = z * (HexMetrics.outerRadius * 1.5f); ;
             position.y = 0;
 
             HexCell cell = _cells[i] = Instantiate<HexCell>(_cellPrefab);
             cell.transform.SetParent(transform,false);
             cell.transform.localPosition = position;
+            cell.coordinate = HexCoordinates.FromOffsetCoordinates(x, z);
 
             Text label = Instantiate<Text>(_cellLabelPrefab);
             label.rectTransform.SetParent(_gridCanvas.transform, false);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
-            label.text = x.ToString() + "\n" + z.ToString();
+            label.text = cell.coordinate.ToStringSeparateLines();
+        }
+    }
+
+    [System.Serializable]
+    public struct HexCoordinates
+    {
+        [SerializeField] int _x, _z;
+        public int X { get { return _x; } }
+        public int Z { get { return _z; } }
+        public int Y
+        {
+            get
+            {
+                return -_x - _z;
+            }
+        }
+
+        public HexCoordinates(int x, int z)
+        {
+            _x = x;
+            _z = z;
+        }
+
+        public static HexCoordinates FromOffsetCoordinates(int x, int z)
+        {
+            return new HexCoordinates(x - z / 2, z);
+        }
+
+        public string ToStringSeparateLines()
+        {
+            return X.ToString() + "\n" + Y.ToString() + "\n" + Z.ToString();
+        }
+        public override string ToString()
+        {
+            return "(" + X.ToString() + ", " + Y.ToString() + ", " + Z.ToString() + ")";
         }
     }
 }

@@ -1,5 +1,5 @@
 using UnityEngine;
-namespace GridSystem.HexGrid
+namespace HexGrid
 {
     public class HexMetrics
     {
@@ -13,7 +13,8 @@ namespace GridSystem.HexGrid
             new Vector3(innerRadius, 0f, -outerRadius * 0.5f),
             new Vector3(0f, 0f, -outerRadius),
             new Vector3(-innerRadius, 0f, -outerRadius * 0.5f),
-            new Vector3(-innerRadius, 0f, outerRadius * 0.5f)
+            new Vector3(-innerRadius, 0f, outerRadius * 0.5f),
+            new Vector3(0f, 0f, outerRadius)
         };
     }
 }
