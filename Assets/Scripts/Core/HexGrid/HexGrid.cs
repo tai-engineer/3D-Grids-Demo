@@ -16,6 +16,9 @@ namespace HexGrid
         HexCell[] _cells;
         Canvas _gridCanvas;
         HexMesh _hexMesh;
+
+        public Color _defaultColor = Color.white;
+        public Color touchedColor = Color.magenta;
         void Awake()
         {
             _gridCanvas = GetComponentInChildren<Canvas>();
@@ -40,18 +43,47 @@ namespace HexGrid
         {
             Vector3 position;
             position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
-            position.z = z * (HexMetrics.outerRadius * 1.5f); ;
+            position.z = z * (HexMetrics.outerRadius * 1.5f);
             position.y = 0;
 
             HexCell cell = _cells[i] = Instantiate<HexCell>(_cellPrefab);
             cell.transform.SetParent(transform,false);
             cell.transform.localPosition = position;
             cell.coordinate = HexCoordinates.FromOffsetCoordinates(x, z);
+            cell.color = _defaultColor;
+            if(x > 0)
+            {
+                cell.SetNeighbor(HexDirection.W, _cells[i - 1]);
+            }
+            if(z > 0)
+            {
+                if( (z & 1) == 0)
+                {
+                    cell.SetNeighbor(HexDirection.SE, _cells[i - width]);
+                    if (x > 0)
+                        cell.SetNeighbor(HexDirection.SW, _cells[i - width - 1]);
+                }
+                else
+                {
+                    cell.SetNeighbor(HexDirection.SW, _cells[i - width]);
+                    if (x < width - 1)
+                        cell.SetNeighbor(HexDirection.SE, _cells[i - width + 1]);
+                }
+            }
 
             Text label = Instantiate<Text>(_cellLabelPrefab);
             label.rectTransform.SetParent(_gridCanvas.transform, false);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             label.text = cell.coordinate.ToStringSeparateLines();
+        }
+        
+        public void ColorCell(Vector3 position, Color color)
+        {
+            position = transform.InverseTransformPoint(position);
+            HexCoordinates coord = HexCoordinates.FromPosition(position);
+            int index = coord.Z * width + coord.X + coord.Z / 2;
+            _cells[index].color = color;
+            _hexMesh.Triangulate(_cells);
         }
     }
 
@@ -74,12 +106,6 @@ namespace HexGrid
             _x = x;
             _z = z;
         }
-
-        public static HexCoordinates FromOffsetCoordinates(int x, int z)
-        {
-            return new HexCoordinates(x - z / 2, z);
-        }
-
         public string ToStringSeparateLines()
         {
             return X.ToString() + "\n" + Y.ToString() + "\n" + Z.ToString();
@@ -87,6 +113,40 @@ namespace HexGrid
         public override string ToString()
         {
             return "(" + X.ToString() + ", " + Y.ToString() + ", " + Z.ToString() + ")";
+        }
+
+        public static HexCoordinates FromOffsetCoordinates(int x, int z)
+        {
+            return new HexCoordinates(x - z / 2, z);
+        }
+        public static HexCoordinates FromPosition(Vector3 position)
+        {
+            float x = position.x / (HexMetrics.innerRadius * 2);
+            float y = -x;
+
+            float offset = position.z / (HexMetrics.outerRadius * 3);
+            x -= offset;
+            y -= offset;
+
+            int iX = Mathf.RoundToInt(x);
+            int iY = Mathf.RoundToInt(y);
+            int iZ = Mathf.RoundToInt(-x - y);
+
+            if ((iX + iY + iZ) != 0)
+            {
+                float dX = Mathf.Abs(x - iX);
+                float dY = Mathf.Abs(y - iY);
+                float dZ = Mathf.Abs(-x - y - iZ);
+                if(dX > dY && dX > dZ)
+                {
+                    iX = -iY - iZ;
+                }
+                else if(dZ > dY)
+                {
+                    dZ = -iX - iY;
+                }
+            }
+            return new HexCoordinates(iX, iZ);
         }
     }
 }
