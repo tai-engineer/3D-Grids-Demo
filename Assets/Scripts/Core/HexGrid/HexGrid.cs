@@ -75,6 +75,7 @@ namespace HexGrid
             label.rectTransform.SetParent(_gridCanvas.transform, false);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             label.text = cell.coordinate.ToStringSeparateLines();
+            cell.uiRect = label.rectTransform;
         }
         
         public HexCell GetCell(Vector3 position)

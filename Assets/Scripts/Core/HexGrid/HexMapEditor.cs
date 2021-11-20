@@ -10,7 +10,7 @@ namespace HexGrid
         Color _activeColor;
         [SerializeField] HexGrid _hexGrid;
         public Color[] colors;
-
+        int _activeElevation;
         void Awake()
         {
             SelectColor(0);
@@ -39,7 +39,13 @@ namespace HexGrid
         public void EditCell(HexCell cell)
         {
             cell.color = _activeColor;
+            cell.Elevation = _activeElevation;
             _hexGrid.Refresh();
+        }
+
+        public void SetElevation(float elevation)
+        {
+            _activeElevation = (int)elevation;
         }
     }
 }

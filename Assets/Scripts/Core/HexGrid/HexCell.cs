@@ -1,14 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 namespace HexGrid
 {
     public class HexCell : MonoBehaviour
     {
+        [SerializeField] HexCell[] _neighbors;
         public HexCoordinates coordinate;
         public Color color;
-        [SerializeField] HexCell[] _neighbors;
+        public RectTransform uiRect;
+        int elevation;
 
+        public int Elevation
+        {
+            get => elevation;
+            set
+            {
+                elevation = value;
+                Vector3 position = transform.localPosition;
+                position.y = elevation * HexMetrics.elevationStep;
+                transform.localPosition = position;
+
+                Vector3 uiPosition = uiRect.localPosition;
+                uiPosition.z = elevation * -HexMetrics.elevationStep;
+                uiRect.localPosition = uiPosition;
+            }
+        }
         public HexCell GetNeighbor(HexDirection direction)
         {
             return _neighbors[(int)direction];
