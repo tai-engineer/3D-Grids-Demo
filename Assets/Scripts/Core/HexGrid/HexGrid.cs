@@ -37,7 +37,7 @@ namespace HexGrid
 
         void Start()
         {
-            _hexMesh.Triangulate(_cells);
+            Refresh();
         }
         void CreateCell(int x, int z, int i)
         {
@@ -77,12 +77,16 @@ namespace HexGrid
             label.text = cell.coordinate.ToStringSeparateLines();
         }
         
-        public void ColorCell(Vector3 position, Color color)
+        public HexCell GetCell(Vector3 position)
         {
             position = transform.InverseTransformPoint(position);
             HexCoordinates coord = HexCoordinates.FromPosition(position);
             int index = coord.Z * width + coord.X + coord.Z / 2;
-            _cells[index].color = color;
+            return _cells[index];
+        }
+
+        public void Refresh()
+        {
             _hexMesh.Triangulate(_cells);
         }
     }

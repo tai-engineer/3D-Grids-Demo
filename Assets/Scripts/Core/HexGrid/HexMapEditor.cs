@@ -29,12 +29,17 @@ namespace HexGrid
             Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(inputRay, out RaycastHit hit))
             {
-                _hexGrid.ColorCell(hit.point, _activeColor);
+                EditCell(_hexGrid.GetCell(hit.point));
             }
         }
         public void SelectColor(int index)
         {
             _activeColor = colors[index];
+        }
+        public void EditCell(HexCell cell)
+        {
+            cell.color = _activeColor;
+            _hexGrid.Refresh();
         }
     }
 }
