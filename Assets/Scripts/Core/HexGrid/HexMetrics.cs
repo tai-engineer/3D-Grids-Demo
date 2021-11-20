@@ -3,6 +3,7 @@ namespace HexGrid
 {
     public class HexMetrics
     {
+        
         public const float solidFactor = 0.75f;
         public const float blendFactor = 1f - solidFactor;
         public static float outerRadius = 10f;
@@ -18,11 +19,15 @@ namespace HexGrid
             new Vector3(0f, 0f, outerRadius)
         };
 
+        #region Terrace Fields
         public const float elevationStep = 5f;
         public const int terracesPerSlope = 2;
         public const int terraceSteps = terracesPerSlope * 2 + 1;
         public const float horizontalTerraceStepSize = 1f / terraceSteps;
         public const float verticalTerraceStepSize = 1f / (terracesPerSlope + 1);
+        #endregion
+
+        #region Corner Methods
         public static Vector3 GetFirstCorner(HexDirection direction)
         {
             return _corners[(int)direction];
@@ -46,7 +51,9 @@ namespace HexGrid
         {
             return (_corners[(int)direction] + _corners[(int)direction + 1]) * blendFactor;
         }
+        #endregion
 
+        #region Terrace Methods
         public static Vector3 TerraceLerp(Vector3 a, Vector3 b, int step)
         {
             float h = step * HexMetrics.horizontalTerraceStepSize;
@@ -57,11 +64,26 @@ namespace HexGrid
             a.y += (b.y - a.y) * v;
             return a;
         }
-
         public static Color TerraceLerp(Color a, Color b, int step)
         {
             float h = step * HexMetrics.horizontalTerraceStepSize;
             return Color.Lerp(a, b, h);
         }
+        public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
+        {
+            if(elevation1 == elevation2)
+                return HexEdgeType.Flat;
+
+            int delta = Mathf.Abs(elevation1 - elevation2);
+            if (delta == 1)
+                return HexEdgeType.Slope;
+
+            return HexEdgeType.Cliff;
+        }
+        #endregion
+    }
+    public enum HexEdgeType
+    {
+        Flat, Slope, Cliff
     }
 }
